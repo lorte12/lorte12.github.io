@@ -1,0 +1,1819 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclipse Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            color: #d1d1d1;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 850px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            background: rgba(12, 12, 12, 0.96);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 16px 11px 15px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #1a1a1a;
+            cursor: move;
+            user-select: none;
+        }
+
+        .logo img {
+            height: 27px;
+            opacity: 0.88;
+        }
+
+        .header-right {
+            display: none;
+        }
+
+        .orb {
+            display: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            overflow: hidden;
+            padding: 0 10px 10px 10px;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 13px 8px 14px 8px;
+            background: #0e0e0e;
+            border-radius: 5px;
+            border: 1px solid #1b1b1b;
+        }
+
+        .category-item {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #131313;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            border: 1px solid #1b1b1b;
+            position: relative;
+        }
+
+        .category-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 6px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(40, 40, 40, 0.5), rgba(30, 30, 30, 0.5));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .category-item:hover::before,
+        .category-item.active::before {
+            opacity: 1;
+        }
+
+        .category-item:hover {
+            background: #191919;
+            transform: translateX(2px);
+        }
+
+        .category-item.active {
+            background: #1e1e1e;
+            border-color: #292929;
+        }
+
+        .category-item .icon {
+            width: 18px;
+            height: 18px;
+            fill: #666666;
+            stroke: #666666;
+            transition: fill 0.2s ease, stroke 0.2s ease;
+        }
+
+        .category-item img.icon {
+            filter: brightness(0.4);
+            transition: filter 0.2s ease;
+        }
+
+        .category-item:hover .icon {
+            fill: #888888;
+            stroke: #888888;
+        }
+
+        .category-item:hover img.icon {
+            filter: brightness(0.5);
+        }
+
+        .category-item.active .icon {
+            fill: #3D9EFF;
+            stroke: #3D9EFF;
+            filter: drop-shadow(0 0 4px rgba(61, 158, 255, 0.6));
+        }
+
+        .category-item.active img.icon {
+            filter: brightness(1) drop-shadow(0 0 4px rgba(61, 158, 255, 0.6));
+        }
+
+        .category-item.user-avatar {
+            margin-top: auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 1px solid #2a2a2a;
+        }
+
+        .category-item.user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Panels */
+        .left-panel,
+        .right-panel {
+            flex: 1;
+            background: #0e0e0e;
+            border-radius: 5px;
+            border: 1px solid #1b1b1b;
+            padding: 11px 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-panel-split {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .left-panel-top,
+        .left-panel-bottom {
+            background: #0e0e0e;
+            border-radius: 5px;
+            border: 1px solid #1b1b1b;
+            padding: 11px 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-panel-top {
+            flex: 1;
+        }
+
+        .left-panel-bottom {
+            flex: 1;
+        }
+
+        .right-panel-split {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .right-panel-top,
+        .right-panel-bottom {
+            background: #0e0e0e;
+            border-radius: 5px;
+            border: 1px solid #1b1b1b;
+            padding: 11px 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right-panel-top {
+            flex: 1;
+        }
+
+        .right-panel-bottom {
+            flex: 0.6;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 11px;
+            padding-bottom: 9px;
+            border-bottom: 1px solid #1b1b1b;
+        }
+
+        .panel-header h2 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #c1c1c1;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #2a2a2a;
+            box-shadow: 0 0 6px rgba(40, 40, 40, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Options List */
+        .options-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .options-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .options-list::-webkit-scrollbar-track {
+            background: #141414;
+            border-radius: 4px;
+        }
+
+        .options-list::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+
+        .options-list::-webkit-scrollbar-thumb:hover {
+            background: #333333;
+        }
+
+        /* Option Item */
+        .option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 11px 8px 12px;
+            margin-bottom: 5px;
+            background: #131313;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.17s ease;
+            border: 1px solid #1b1b1b;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: #292929;
+            transform: scaleY(0);
+            transition: transform 0.14s ease;
+        }
+
+        .option-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .option-item:hover {
+            background: #181818;
+            border-color: #232323;
+            transform: translateX(2px);
+        }
+
+        .option-item.active {
+            background: #1d1d1d;
+            border-color: #282828;
+        }
+
+        .option-label {
+            font-size: 0.8rem;
+            color: #afafaf;
+            font-weight: 400;
+        }
+
+        /* Option Controls */
+        .option-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            width: 34px;
+            height: 18px;
+            background: #191919;
+            border-radius: 9px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.19s ease;
+            border: 1px solid #242424;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #434343;
+            top: 2px;
+            left: 2px;
+            transition: all 0.19s ease;
+        }
+
+        .toggle-switch.active {
+            background: #3D9EFF;
+            border-color: #3D9EFF;
+        }
+
+        .toggle-switch.active::before {
+            transform: translateX(16px);
+            background: #ffffff;
+            box-shadow: 0 0 7px rgba(255, 255, 255, 0.38);
+        }
+
+        /* Dropdown */
+        .dropdown {
+            position: relative;
+            min-width: 100px;
+        }
+
+        .dropdown-selected {
+            padding: 5px 23px 5px 10px;
+            background: #191919;
+            border: 1px solid #242424;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            color: #878787;
+            position: relative;
+            transition: all 0.18s ease;
+        }
+
+        .dropdown-selected::after {
+            content: '▼';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.55rem;
+            color: #666666;
+            transition: transform 0.2s ease;
+        }
+
+        .dropdown-selected:hover {
+            background: #1f1f1f;
+            border-color: #2a2a2a;
+        }
+
+        .dropdown.open .dropdown-selected::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        /* Slider */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 130px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 3px;
+            background: #191919;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .slider-fill {
+            height: 100%;
+            background: linear-gradient(to right, #e8e8e8, #3D9EFF);
+            border-radius: 2px;
+            position: relative;
+            transition: width 0.08s ease;
+        }
+
+        .slider-thumb {
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: #3D9EFF;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(61, 158, 255, 0.58);
+            cursor: grab;
+        }
+
+        .slider-thumb:active {
+            cursor: grabbing;
+        }
+
+        .slider-value {
+            min-width: 30px;
+            text-align: right;
+            font-size: 0.75rem;
+            color: #777777;
+            font-weight: 500;
+        }
+
+        /* Section Headers */
+        .section-header {
+            padding: 6px 10px;
+            margin: 8px 0 5px 0;
+            background: #141414;
+            border-left: 2px solid #2a2a2a;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #666666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                width: 95%;
+                height: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header avec logo -->
+        <header class="header">
+            <div class="logo">
+                <img src="https://raw.githubusercontent.com/lorte12/lorte12.github.io/main/Logo.png" alt="Eclipse Logo">
+            </div>
+            <div class="header-right">
+                <div class="orb"></div>
+            </div>
+        </header>
+
+        <!-- Menu principal -->
+        <div class="main-content">
+            <!-- Sidebar gauche avec catégories -->
+            <aside class="sidebar">
+                <!-- Player -->
+                <div class="category-item active">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                </div>
+                <!-- Online -->
+                <div class="category-item">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke-width="2"/>
+                        <ellipse cx="12" cy="12" rx="4" ry="10" fill="none" stroke-width="2"/>
+                        <line x1="2" y1="12" x2="22" y2="12" stroke-width="2"/>
+                        <path d="M 4 7.5 Q 12 6.5 20 7.5" fill="none" stroke-width="2"/>
+                        <path d="M 4 16.5 Q 12 17.5 20 16.5" fill="none" stroke-width="2"/>
+                    </svg>
+                </div>
+                <!-- Server -->
+                <div class="category-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                </div>
+                <!-- Weapon -->
+                <div class="category-item">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <rect x="3" y="7" width="15" height="3" stroke-width="0"/>
+                        <rect x="16" y="6" width="4" height="5" stroke-width="0"/>
+                        <rect x="4" y="5" width="2" height="2" stroke-width="0"/>
+                        <line x1="7" y1="5.5" x2="7" y2="9.5" stroke-width="0.5"/>
+                        <line x1="8.5" y1="5.5" x2="8.5" y2="9.5" stroke-width="0.5"/>
+                        <line x1="10" y1="5.5" x2="10" y2="9.5" stroke-width="0.5"/>
+                        <line x1="11.5" y1="5.5" x2="11.5" y2="9.5" stroke-width="0.5"/>
+                        <polygon points="3,10 2,18 5,18 6,10" stroke-width="0"/>
+                        <rect x="7" y="10" width="3" height="2" rx="0.5" stroke-width="0"/>
+                        <ellipse cx="9" cy="12.5" rx="0.8" ry="1" stroke-width="0"/>
+                        <rect x="20" y="7" width="2" height="2" stroke-width="0"/>
+                    </svg>
+                </div>
+                <!-- Vehicle -->
+                <div class="category-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+                </div>
+                <!-- Visual -->
+                <div class="category-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                </div>
+                <!-- Miscellaneous -->
+                <div class="category-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                </div>
+                <!-- Settings -->
+                <div class="category-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                </div>
+                <!-- Search -->
+                <div class="category-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-2.06 11L15 15.28 12.06 17l.78-3.33-2.59-2.24 3.41-.29L15 8l1.34 3.14 3.41.29-2.59 2.24.78 3.33z"/></svg>
+                </div>
+                <div class="category-item user-avatar">
+                    <img src="https://raw.githubusercontent.com/lorte12/lorte12.github.io/main/Logo.png" alt="User">
+                </div>
+            </aside>
+
+            <!-- Panel gauche avec options -->
+            <div class="left-panel" id="left-panel-container">
+                <div class="panel-header">
+                    <h2 id="category-title">Player</h2>
+                    <div class="status-indicator"></div>
+                </div>
+                <div class="options-list" id="left-options">
+                    <!-- Options seront injectées par JS -->
+                </div>
+            </div>
+
+            <!-- Panel droit avec sous-options -->
+            <div class="right-panel" id="right-panel-container">
+                <div class="panel-header">
+                    <h2 id="subcategory-title"></h2>
+                </div>
+                <div class="options-list" id="right-options">
+                    <!-- Sous-options seront injectées par JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données du menu extraites du menu Lua FiveM
+        const menuData = {
+            player: {
+                title: "Player",
+                options: [
+                    { label: "Noclip", type: "toggle", value: false },
+                    { label: "GodMode", type: "toggle", value: false },
+                    { label: "Super saut", type: "toggle", value: false },
+                    { label: "Invisibility", type: "toggle", value: false },
+                    { label: "Vitesse", type: "slider", value: 1.0, min: 1.0, max: 10.0, step: 0.5 },
+                    { label: "Stamina infinie", type: "toggle", value: false },
+                    { label: "Changer skin", type: "action" },
+                    { label: "Soigner", type: "action" },
+                    { label: "Remplir armure", type: "action" },
+                    { label: "Revive", type: "action" },
+                    { label: "Suicide", type: "action" },
+                    { label: "Tirer une bulle", type: "action" }
+                ]
+            },
+            entities: {
+                title: "Entités",
+                options: [
+                    { label: "Détacher toutes entités", type: "action" },
+                    { label: "Robot de bus", type: "toggle", value: false },
+                    { label: "Feux d'artifice", type: "toggle", value: false }
+                ]
+            },
+            outfits: {
+                title: "Custom Outfits",
+                options: [
+                    { label: "Outfits Addon", type: "action", category: "outfitsaddon" },
+                    { label: "Visage (Head)", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Masques (Mask)", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Cheveux (Hair)", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Torses (Torso)", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Jambes (Legs)", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Sacs (Bags)", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Chaussures (Shoes)", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Accessoires", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Sous-vêtements", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Gilets pare-balles", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Décalcomanies", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Hauts (Tops)", type: "slider", value: 0, min: -1, max: 50, step: 1 },
+                    { label: "Réinitialiser tenue", type: "action" }
+                ]
+            },
+            outfitsaddon: {
+                title: "Outfits Addon",
+                options: [
+                    { label: "Chargement...", type: "action" }
+                ]
+            },
+            online: {
+                title: "Online",
+                options: [
+                    { label: "Player 1 (ID: 1)", type: "action" },
+                    { label: "Player 2 (ID: 2)", type: "action" },
+                    { label: "Player 3 (ID: 3)", type: "action" }
+                ]
+            },
+            troll: {
+                title: "Troll Options",
+                options: [
+                    { label: "Spectate Player", type: "toggle", value: false },
+                    { label: "TP vers joueur", type: "action" },
+                    { label: "TP vers moi", type: "action" },
+                    { label: "Faire exploser", type: "action" },
+                    { label: "Fuck Player", type: "action", category: "fuckplayer" },
+                    { label: "Véhicules Troll", type: "action", category: "vehiclestroll" },
+                    { label: "Crash Player", type: "action" },
+                    { label: "TP vers lui", type: "action" },
+                    { label: "Spawn PNJ autour", type: "action" },
+                    { label: "Cage joueur", type: "action" },
+                    { label: "Donner arme", type: "action" },
+                    { label: "Supprimer armes", type: "action" },
+                    { label: "Freeze joueur", type: "toggle", value: false },
+                    { label: "Invisible", type: "toggle", value: false },
+                    { label: "Spam véhicules", type: "toggle", value: false }
+                ]
+            },
+            fuckplayer: {
+                title: "Fuck Player",
+                options: [
+                    { label: "Fuck Effect", type: "action" },
+                    { label: "Blackhole", type: "action" },
+                    { label: "Attachhole", type: "action" }
+                ]
+            },
+            vehiclestroll: {
+                title: "Véhicules Troll",
+                options: [
+                    { label: "Lancer véhicule", type: "action" },
+                    { label: "Force Hijack", type: "action" }
+                ]
+            },
+            weapon: {
+                title: "Weapon",
+                options: [
+                    { label: "Weapon Custom", type: "action", category: "weaponcustom" },
+                    { label: "Enlever composants", type: "action" },
+                    { label: "Vehicle Gun", type: "toggle", value: false },
+                    { label: "Dégâts infinis", type: "toggle", value: false },
+                    { label: "Munitions infinies", type: "toggle", value: false },
+                    { label: "Pas de rechargement", type: "toggle", value: false },
+                    { label: "Pas de recul", type: "toggle", value: false },
+                    { label: "Rapid Fire", type: "toggle", value: false },
+                    { label: "One shot kill", type: "toggle", value: false },
+                    { label: "Effets visuels", type: "dropdown", values: ["Normal", "Feu", "Explosion", "Laser"], selected: 0 }
+                ]
+            },
+            weaponmods: {
+                title: "Weapon Mods",
+                options: [
+                    { label: "Balles explosives", type: "toggle", value: false },
+                    { label: "Balles de feu", type: "toggle", value: false },
+                    { label: "Balles véhicules", type: "toggle", value: false }
+                ]
+            },
+            weaponcustom: {
+                title: "Weapon Custom",
+                options: [
+                    { label: "Teinte: Normal", type: "action" },
+                    { label: "Teinte: Green", type: "action" },
+                    { label: "Teinte: Gold", type: "action" },
+                    { label: "Teinte: Pink", type: "action" },
+                    { label: "Teinte: Army", type: "action" },
+                    { label: "Teinte: LSPD", type: "action" },
+                    { label: "Teinte: Orange", type: "action" },
+                    { label: "Teinte: Platinum", type: "action" },
+                    { label: "Silencieux", type: "action" },
+                    { label: "Silencieux Heavy", type: "action" },
+                    { label: "Chargeur étendu", type: "action" },
+                    { label: "Chargeur drum", type: "action" },
+                    { label: "Lampe torche", type: "action" },
+                    { label: "Poignée", type: "action" },
+                    { label: "Viseur holographique", type: "action" },
+                    { label: "Lunette avancée", type: "action" },
+                    { label: "Lunette zoom", type: "action" },
+                    { label: "Viseur thermique", type: "action" }
+                ]
+            },
+            weaponlist: {
+                title: "Liste Armes",
+                options: [
+                    { label: "MELEE", type: "section" },
+                    { label: "Knife", type: "action" },
+                    { label: "Nightstick", type: "action" },
+                    { label: "Hammer", type: "action" },
+                    { label: "Bat", type: "action" },
+                    { label: "Golf Club", type: "action" },
+                    { label: "Crowbar", type: "action" },
+                    { label: "Bottle", type: "action" },
+                    { label: "Dagger", type: "action" },
+                    { label: "Hatchet", type: "action" },
+                    { label: "Knuckle", type: "action" },
+                    { label: "Machete", type: "action" },
+                    { label: "Flashlight", type: "action" },
+                    { label: "Switchblade", type: "action" },
+                    { label: "Pool Cue", type: "action" },
+                    { label: "Wrench", type: "action" },
+                    { label: "Battle Axe", type: "action" },
+                    { label: "HANDGUNS", type: "section" },
+                    { label: "Pistol", type: "action" },
+                    { label: "Combat Pistol", type: "action" },
+                    { label: "Pistol .50", type: "action" },
+                    { label: "SNS Pistol", type: "action" },
+                    { label: "Heavy Pistol", type: "action" },
+                    { label: "Vintage Pistol", type: "action" },
+                    { label: "Marksman Pistol", type: "action" },
+                    { label: "Revolver", type: "action" },
+                    { label: "AP Pistol", type: "action" },
+                    { label: "Stun Gun", type: "action" },
+                    { label: "Flare Gun", type: "action" },
+                    { label: "Double Action", type: "action" },
+                    { label: "SMG", type: "section" },
+                    { label: "Micro SMG", type: "action" },
+                    { label: "SMG", type: "action" },
+                    { label: "Assault SMG", type: "action" },
+                    { label: "Combat PDW", type: "action" },
+                    { label: "MG", type: "action" },
+                    { label: "Combat MG", type: "action" },
+                    { label: "Gusenberg", type: "action" },
+                    { label: "Mini SMG", type: "action" },
+                    { label: "SHOTGUNS", type: "section" },
+                    { label: "Pump Shotgun", type: "action" },
+                    { label: "Sawed-Off", type: "action" },
+                    { label: "Bullpup Shotgun", type: "action" },
+                    { label: "Assault Shotgun", type: "action" },
+                    { label: "Musket", type: "action" },
+                    { label: "Heavy Shotgun", type: "action" },
+                    { label: "Double Barrel", type: "action" },
+                    { label: "Sweeper Shotgun", type: "action" },
+                    { label: "ASSAULT RIFLES", type: "section" },
+                    { label: "Assault Rifle", type: "action" },
+                    { label: "Carbine Rifle", type: "action" },
+                    { label: "Advanced Rifle", type: "action" },
+                    { label: "Special Carbine", type: "action" },
+                    { label: "Bullpup Rifle", type: "action" },
+                    { label: "Compact Rifle", type: "action" },
+                    { label: "SNIPERS", type: "section" },
+                    { label: "Sniper Rifle", type: "action" },
+                    { label: "Heavy Sniper", type: "action" },
+                    { label: "Marksman Rifle", type: "action" },
+                    { label: "HEAVY", type: "section" },
+                    { label: "RPG", type: "action" },
+                    { label: "Grenade Launcher", type: "action" },
+                    { label: "Firework Launcher", type: "action" },
+                    { label: "Homing Launcher", type: "action" },
+                    { label: "Compact Launcher", type: "action" },
+                    { label: "Minigun", type: "action" },
+                    { label: "Railgun", type: "action" },
+                    { label: "THROWABLES", type: "section" },
+                    { label: "Grenade", type: "action" },
+                    { label: "Sticky Bomb", type: "action" },
+                    { label: "Proximity Mine", type: "action" },
+                    { label: "BZ Gas", type: "action" },
+                    { label: "Molotov", type: "action" },
+                    { label: "Fire Extinguisher", type: "action" },
+                    { label: "Petrol Can", type: "action" },
+                    { label: "Flare", type: "action" },
+                    { label: "Ball", type: "action" },
+                    { label: "Snowball", type: "action" },
+                    { label: "Smoke Grenade", type: "action" }
+                ]
+            },
+            settings: {
+                title: "Settings",
+                options: [
+                    { label: "Interface Settings", type: "action", category: "interface" },
+                    { label: "Thème", type: "action", category: "theme" },
+                    { label: "Position Menu", type: "action" },
+                    { label: "Afficher FPS", type: "toggle", value: false },
+                    { label: "Mode discret", type: "toggle", value: false },
+                    { label: "UI transparente", type: "toggle", value: false },
+                    { label: "Notifications", type: "toggle", value: true }
+                ]
+            },
+            interface: {
+                title: "Interface Settings",
+                options: [
+                    { label: "Glow Effect", type: "slider", value: 1.0, min: 0.0, max: 2.0, step: 0.1 },
+                    { label: "Menu Animation Delay", type: "slider", value: 0.25, min: 0.05, max: 0.50, step: 0.05 }
+                ]
+            },
+            theme: {
+                title: "Thème",
+                options: [
+                    { label: "Rouge", type: "action" },
+                    { label: "Bleu Ciel", type: "action" },
+                    { label: "Violet", type: "action" },
+                    { label: "Halloween", type: "action" },
+                    { label: "Dark", type: "action" },
+                    { label: "French", type: "action" },
+                    { label: "Pink", type: "action" },
+                    { label: "Red", type: "action" },
+                    { label: "Russia", type: "action" },
+                    { label: "Green Smoke", type: "action" },
+                    { label: "Purple Smoke", type: "action" },
+                    { label: "Winter", type: "action" },
+                    { label: "Blue Smoke", type: "action" },
+                    { label: "Retro", type: "action" }
+                ]
+            },
+            vehicle: {
+                title: "Vehicle",
+                options: [
+                    { label: "Spawn véhicule", type: "action", category: "vehiclelist" },
+                    { label: "Spawn Véhicule Addon", type: "action", category: "vehiclesaddon" },
+                    { label: "Supprimer véhicule", type: "action" },
+                    { label: "Réparer véhicule", type: "action" },
+                    { label: "Boost moteur", type: "toggle", value: false },
+                    { label: "Voler vers moi", type: "action" },
+                    { label: "Couleur néon", type: "dropdown", values: ["Off", "Red", "Blue", "Green", "Rainbow"], selected: 0 },
+                    { label: "Customiser véhicule", type: "action", category: "vehiclecustom" }
+                ]
+            },
+            vehiclesaddon: {
+                title: "Véhicules Addon",
+                options: [
+                    { label: "Chargement...", type: "action" }
+                ]
+            },
+            vehiclecustom: {
+                title: "Véhicule Custom",
+                options: [
+                    { label: "Engine Level", type: "slider", value: 0, min: 0, max: 4, step: 1 },
+                    { label: "Armor Level", type: "slider", value: 0, min: 0, max: 5, step: 1 },
+                    { label: "Brakes Level", type: "slider", value: 0, min: 0, max: 3, step: 1 },
+                    { label: "Suspension Level", type: "slider", value: 0, min: 0, max: 4, step: 1 },
+                    { label: "Turbo", type: "toggle", value: false },
+                    { label: "Transmission Level", type: "slider", value: 0, min: 0, max: 3, step: 1 },
+                    { label: "Wheel Type", type: "dropdown", values: ["Sport", "Muscle", "Lowrider", "SUV", "Offroad", "Tuner", "High End"], selected: 0 },
+                    { label: "Window Tint", type: "slider", value: 0, min: 0, max: 5, step: 1 },
+                    { label: "Xenon Lights", type: "toggle", value: false },
+                    { label: "Couleur Primaire", type: "action", category: "primarycolor" },
+                    { label: "Couleur Secondaire", type: "action", category: "secondarycolor" },
+                    { label: "Edit Plate", type: "action", category: "editplate" }
+                ]
+            },
+            editplate: {
+                title: "Edit Plate",
+                options: [
+                    { label: "Blue on White 1", type: "action" },
+                    { label: "Blue on White 2", type: "action" },
+                    { label: "Blue on White 3", type: "action" },
+                    { label: "Yellow on Blue", type: "action" },
+                    { label: "Yellow on Black", type: "action" },
+                    { label: "North Yankton", type: "action" },
+                    { label: "SA Exempt", type: "action" },
+                    { label: "SA Caps", type: "action" },
+                    { label: "SA Old", type: "action" },
+                    { label: "LS Car Meet", type: "action" },
+                    { label: "Dealer", type: "action" }
+                ]
+            },
+            primarycolor: {
+                title: "Couleur Primaire",
+                options: [
+                    { label: "CLASSIQUES", type: "section" },
+                    { label: "Noir", type: "action" },
+                    { label: "Gris Graphite", type: "action" },
+                    { label: "Gris Métallique", type: "action" },
+                    { label: "Argent", type: "action" },
+                    { label: "Blanc", type: "action" },
+                    { label: "Bleu", type: "action" },
+                    { label: "Bleu Foncé", type: "action" },
+                    { label: "Bleu Saxe", type: "action" },
+                    { label: "Bleu Minuit", type: "action" },
+                    { label: "Vert Olive", type: "action" },
+                    { label: "Vert", type: "action" },
+                    { label: "Vert Lime", type: "action" },
+                    { label: "Rouge", type: "action" },
+                    { label: "Rouge Lave", type: "action" },
+                    { label: "Bordeaux", type: "action" },
+                    { label: "Orange", type: "action" },
+                    { label: "Jaune", type: "action" },
+                    { label: "Or", type: "action" },
+                    { label: "Rose", type: "action" },
+                    { label: "Violet", type: "action" },
+                    { label: "Marron", type: "action" },
+                    { label: "METALLIQUES", type: "section" },
+                    { label: "Chrome", type: "action" },
+                    { label: "Champagne", type: "action" },
+                    { label: "Beige", type: "action" },
+                    { label: "Bronze", type: "action" },
+                    { label: "Cuivre", type: "action" },
+                    { label: "MATS", type: "section" },
+                    { label: "Noir Mat", type: "action" },
+                    { label: "Gris Mat", type: "action" },
+                    { label: "Bleu Mat", type: "action" },
+                    { label: "Vert Mat", type: "action" },
+                    { label: "Rouge Mat", type: "action" },
+                    { label: "Orange Mat", type: "action" },
+                    { label: "Jaune Mat", type: "action" },
+                    { label: "SPECIAUX", type: "section" },
+                    { label: "Brushed Steel", type: "action" },
+                    { label: "Brushed Black Steel", type: "action" },
+                    { label: "Brushed Aluminium", type: "action" },
+                    { label: "Pure Gold", type: "action" }
+                ]
+            },
+            secondarycolor: {
+                title: "Couleur Secondaire",
+                options: [
+                    { label: "CLASSIQUES", type: "section" },
+                    { label: "Noir", type: "action" },
+                    { label: "Gris Graphite", type: "action" },
+                    { label: "Gris Métallique", type: "action" },
+                    { label: "Argent", type: "action" },
+                    { label: "Blanc", type: "action" },
+                    { label: "Bleu", type: "action" },
+                    { label: "Bleu Foncé", type: "action" },
+                    { label: "Bleu Saxe", type: "action" },
+                    { label: "Bleu Minuit", type: "action" },
+                    { label: "Vert Olive", type: "action" },
+                    { label: "Vert", type: "action" },
+                    { label: "Vert Lime", type: "action" },
+                    { label: "Rouge", type: "action" },
+                    { label: "Rouge Lave", type: "action" },
+                    { label: "Bordeaux", type: "action" },
+                    { label: "Orange", type: "action" },
+                    { label: "Jaune", type: "action" },
+                    { label: "Or", type: "action" },
+                    { label: "Rose", type: "action" },
+                    { label: "Violet", type: "action" },
+                    { label: "Marron", type: "action" },
+                    { label: "METALLIQUES", type: "section" },
+                    { label: "Chrome", type: "action" },
+                    { label: "Champagne", type: "action" },
+                    { label: "Beige", type: "action" },
+                    { label: "Bronze", type: "action" },
+                    { label: "Cuivre", type: "action" },
+                    { label: "MATS", type: "section" },
+                    { label: "Noir Mat", type: "action" },
+                    { label: "Gris Mat", type: "action" },
+                    { label: "Bleu Mat", type: "action" },
+                    { label: "Vert Mat", type: "action" },
+                    { label: "Rouge Mat", type: "action" },
+                    { label: "Orange Mat", type: "action" },
+                    { label: "Jaune Mat", type: "action" },
+                    { label: "SPECIAUX", type: "section" },
+                    { label: "Brushed Steel", type: "action" },
+                    { label: "Brushed Black Steel", type: "action" },
+                    { label: "Brushed Aluminium", type: "action" },
+                    { label: "Pure Gold", type: "action" }
+                ]
+            },
+            vehiclelist: {
+                title: "Liste Véhicules",
+                options: [
+                    { label: "SUPER CARS", type: "section" },
+                    { label: "Adder", type: "action" },
+                    { label: "Banshee 900R", type: "action" },
+                    { label: "Bullet", type: "action" },
+                    { label: "Cheetah", type: "action" },
+                    { label: "Entity XF", type: "action" },
+                    { label: "ETR1", type: "action" },
+                    { label: "FMJ", type: "action" },
+                    { label: "Infernus", type: "action" },
+                    { label: "Osiris", type: "action" },
+                    { label: "RE-7B", type: "action" },
+                    { label: "Reaper", type: "action" },
+                    { label: "Sultan RS", type: "action" },
+                    { label: "T20", type: "action" },
+                    { label: "Turismo R", type: "action" },
+                    { label: "Tyrus", type: "action" },
+                    { label: "Vacca", type: "action" },
+                    { label: "Voltic", type: "action" },
+                    { label: "X80 Proto", type: "action" },
+                    { label: "Zentorno", type: "action" },
+                    { label: "SPORTS", type: "section" },
+                    { label: "9F", type: "action" },
+                    { label: "Alpha", type: "action" },
+                    { label: "Banshee", type: "action" },
+                    { label: "Bestia GTS", type: "action" },
+                    { label: "Blista Compact", type: "action" },
+                    { label: "Buffalo", type: "action" },
+                    { label: "Buffalo S", type: "action" },
+                    { label: "Carbonizzare", type: "action" },
+                    { label: "Comet", type: "action" },
+                    { label: "Coquette", type: "action" },
+                    { label: "Drift Tampa", type: "action" },
+                    { label: "Elegy RH8", type: "action" },
+                    { label: "Feltzer", type: "action" },
+                    { label: "Furore GT", type: "action" },
+                    { label: "Fusilade", type: "action" },
+                    { label: "Jester", type: "action" },
+                    { label: "Kuruma", type: "action" },
+                    { label: "Lynx", type: "action" },
+                    { label: "Massacro", type: "action" },
+                    { label: "Omnis", type: "action" },
+                    { label: "Penumbra", type: "action" },
+                    { label: "Rapid GT", type: "action" },
+                    { label: "Schafter V12", type: "action" },
+                    { label: "Seven-70", type: "action" },
+                    { label: "Sprunk Buffalo", type: "action" },
+                    { label: "Sultan", type: "action" },
+                    { label: "Surano", type: "action" },
+                    { label: "Tropos", type: "action" },
+                    { label: "Verlierer", type: "action" },
+                    { label: "MOTORCYCLES", type: "section" },
+                    { label: "Akuma", type: "action" },
+                    { label: "Bagger", type: "action" },
+                    { label: "Bati 801", type: "action" },
+                    { label: "Carbon RS", type: "action" },
+                    { label: "Chimera", type: "action" },
+                    { label: "Cliffhanger", type: "action" },
+                    { label: "Daemon", type: "action" },
+                    { label: "Double T", type: "action" },
+                    { label: "Enduro", type: "action" },
+                    { label: "Faggio", type: "action" },
+                    { label: "Gargoyle", type: "action" },
+                    { label: "Hakuchou", type: "action" },
+                    { label: "Hexer", type: "action" },
+                    { label: "Innovation", type: "action" },
+                    { label: "Lectro", type: "action" },
+                    { label: "Nemesis", type: "action" },
+                    { label: "PCJ 600", type: "action" },
+                    { label: "Ruffian", type: "action" },
+                    { label: "Sanchez", type: "action" },
+                    { label: "Sovereign", type: "action" },
+                    { label: "Thrust", type: "action" },
+                    { label: "Vader", type: "action" },
+                    { label: "Vindicator", type: "action" },
+                    { label: "Wolfsbane", type: "action" },
+                    { label: "Zombie Bobber", type: "action" },
+                    { label: "OFF-ROAD", type: "section" },
+                    { label: "Bifta", type: "action" },
+                    { label: "Blazer", type: "action" },
+                    { label: "Brawler", type: "action" },
+                    { label: "Dubsta 6x6", type: "action" },
+                    { label: "Dune Buggy", type: "action" },
+                    { label: "Insurgent", type: "action" },
+                    { label: "Kalahari", type: "action" },
+                    { label: "Rebel", type: "action" },
+                    { label: "Sandking XL", type: "action" },
+                    { label: "Technical", type: "action" },
+                    { label: "Trophy Truck", type: "action" },
+                    { label: "SUVS", type: "section" },
+                    { label: "Baller", type: "action" },
+                    { label: "Cavalcade", type: "action" },
+                    { label: "Contender", type: "action" },
+                    { label: "Dubsta", type: "action" },
+                    { label: "FQ 2", type: "action" },
+                    { label: "Granger", type: "action" },
+                    { label: "Gresley", type: "action" },
+                    { label: "Huntley S", type: "action" },
+                    { label: "Landstalker", type: "action" },
+                    { label: "Mesa", type: "action" },
+                    { label: "Patriot", type: "action" },
+                    { label: "Radius", type: "action" },
+                    { label: "Rocoto", type: "action" },
+                    { label: "Seminole", type: "action" },
+                    { label: "Serrano", type: "action" },
+                    { label: "XLS", type: "action" },
+                    { label: "HELICOPTERS", type: "section" },
+                    { label: "Annihilator", type: "action" },
+                    { label: "Buzzard", type: "action" },
+                    { label: "Cargobob", type: "action" },
+                    { label: "Frogger", type: "action" },
+                    { label: "Havok", type: "action" },
+                    { label: "Hunter", type: "action" },
+                    { label: "Maverick", type: "action" },
+                    { label: "Police Maverick", type: "action" },
+                    { label: "Savage", type: "action" },
+                    { label: "Skylift", type: "action" },
+                    { label: "SuperVolito", type: "action" },
+                    { label: "Swift", type: "action" },
+                    { label: "Valkyrie", type: "action" },
+                    { label: "PLANES", type: "section" },
+                    { label: "Alpha Z1", type: "action" },
+                    { label: "Besra", type: "action" },
+                    { label: "Cuban 800", type: "action" },
+                    { label: "Dodo", type: "action" },
+                    { label: "Duster", type: "action" },
+                    { label: "Hydra", type: "action" },
+                    { label: "Jet", type: "action" },
+                    { label: "Lazer", type: "action" },
+                    { label: "Luxor", type: "action" },
+                    { label: "Mammatus", type: "action" },
+                    { label: "Miljet", type: "action" },
+                    { label: "Nimbus", type: "action" },
+                    { label: "Shamal", type: "action" },
+                    { label: "Stunt Plane", type: "action" },
+                    { label: "Titan", type: "action" },
+                    { label: "Velum", type: "action" },
+                    { label: "Vestra", type: "action" }
+                ]
+            },
+            misc: {
+                title: "Miscellaneous",
+                options: [
+                    { label: "TP au waypoint", type: "action" },
+                    { label: "Nettoyer map", type: "action", category: "clearworld" },
+                    { label: "Donner argent", type: "action" },
+                    { label: "Clear wanted", type: "action" }
+                ]
+            },
+            clearworld: {
+                title: "Clear World",
+                options: [
+                    { label: "Clear véhicules", type: "action" },
+                    { label: "Clear eau", type: "action" },
+                    { label: "Clear clouds", type: "action" },
+                    { label: "Clear props", type: "action" }
+                ]
+            },
+            time: {
+                title: "Time",
+                options: [
+                    { label: "Heure", type: "slider", value: 12, min: 0, max: 23, step: 1 },
+                    { label: "Clear", type: "toggle", value: false },
+                    { label: "Extra Sunny", type: "toggle", value: false },
+                    { label: "Clouds", type: "toggle", value: false },
+                    { label: "Overcast", type: "toggle", value: false },
+                    { label: "Rain", type: "toggle", value: false },
+                    { label: "Thunder", type: "toggle", value: false },
+                    { label: "Snow", type: "toggle", value: false },
+                    { label: "Blizzard", type: "toggle", value: false },
+                    { label: "Clearing", type: "toggle", value: false },
+                    { label: "Neutral", type: "toggle", value: false },
+                    { label: "Snowlight", type: "toggle", value: false },
+                    { label: "Xmas", type: "toggle", value: false },
+                    { label: "Halloween", type: "toggle", value: false }
+                ]
+            },
+            freecam: {
+                title: "Freecam",
+                options: [
+                    { label: "Activer Freecam", type: "toggle", value: false },
+                    { label: "Vitesse Freecam", type: "slider", value: 1.0, min: 0.1, max: 10.0, step: 0.5 },
+                    { label: "Boost Véhicule", type: "toggle", value: false },
+                    { label: "Clone Player", type: "toggle", value: false },
+                    { label: "Physic Props", type: "toggle", value: false },
+                    { label: "Physic Véhicule", type: "toggle", value: false }
+                ]
+            },
+            folder: {
+                title: "Search",
+                options: [
+                    { label: "Rechercher...", type: "action" },
+                    { label: "Favoris", type: "action" },
+                    { label: "Historique", type: "action" }
+                ]
+            },
+            visual: {
+                title: "Visual",
+                options: [
+                    { label: "ESP Skeleton", type: "toggle", value: false },
+                    { label: "ESP Box", type: "toggle", value: false },
+                    { label: "ESP Snaplines", type: "toggle", value: false },
+                    { label: "ESP Health Bar", type: "toggle", value: false },
+                    { label: "ESP Name", type: "toggle", value: false }
+                ]
+            },
+            espsettings: {
+                title: "ESP Settings",
+                options: [
+                    { label: "Draw Peds", type: "toggle", value: true },
+                    { label: "Draw Players", type: "toggle", value: true },
+                    { label: "Draw Dead", type: "toggle", value: false },
+                    { label: "Draw Self", type: "toggle", value: false },
+                    { label: "Distance", type: "slider", value: 500, min: 50, max: 1000, step: 50 }
+                ]
+            },
+            server: {
+                title: "Server",
+                options: [
+                    { label: "Clear World", type: "action" },
+                    { label: "Fuck maps", type: "toggle", value: false },
+                    { label: "Effect serveur", type: "toggle", value: false },
+                    { label: "Fuck player", type: "toggle", value: false },
+                    { label: "Spawn big tube", type: "action" },
+                    { label: "Fuck props", type: "toggle", value: false }
+                ]
+            }
+        };
+
+        // État actuel
+        let currentCategory = 'player';
+        let activeOptions = {};
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeCategories();
+            loadCategory('player');
+        });
+
+        // Initialiser les catégories
+        function initializeCategories() {
+            const categories = document.querySelectorAll('.category-item');
+            const categoryMap = ['player', 'online', 'server', 'weapon', 'vehicle', 'visual', 'misc', 'settings', 'folder'];
+            
+            categories.forEach((cat, index) => {
+                if (!cat.classList.contains('user-avatar') && index < categoryMap.length) {
+                    const categoryKey = categoryMap[index];
+                    cat.addEventListener('click', () => {
+                        categories.forEach(c => c.classList.remove('active'));
+                        cat.classList.add('active');
+                        loadCategory(categoryKey);
+                    });
+                }
+            });
+        }
+
+        // Charger une catégorie
+        function loadCategory(categoryKey) {
+            currentCategory = categoryKey;
+            const data = menuData[categoryKey];
+            if (!data) return;
+
+            const leftContainer = document.getElementById('left-panel-container');
+
+            if (categoryKey === 'weapon') {
+                // Deux panneaux à gauche pour Weapon
+                loadWeaponLeftPanels();
+            } else {
+                // Panel gauche normal
+                leftContainer.className = 'left-panel';
+                leftContainer.innerHTML = `
+                    <div class="panel-header">
+                        <h2 id="category-title">${data.title}</h2>
+                        <div class="status-indicator"></div>
+                    </div>
+                    <div class="options-list" id="left-options">
+                    </div>
+                `;
+
+                const leftOptions = document.getElementById('left-options');
+                data.options.forEach((option, index) => {
+                    const optionElement = createOptionElement(option, categoryKey, index);
+                    leftOptions.appendChild(optionElement);
+                });
+            }
+
+            // Afficher Troll Options par défaut pour la catégorie Online
+            if (categoryKey === 'online') {
+                loadSubCategory('troll');
+            } else if (categoryKey === 'player') {
+                loadPlayerRightPanels();
+            } else if (categoryKey === 'weapon') {
+                loadWeaponRightPanels();
+            } else if (categoryKey === 'visual') {
+                loadSubCategory('espsettings');
+            } else if (categoryKey === 'misc') {
+                loadMiscRightPanels();
+            } else {
+                clearRightPanel();
+            }
+        }
+
+        // Charger les deux panneaux pour Miscellaneous
+        function loadMiscRightPanels() {
+            const rightContainer = document.getElementById('right-panel-container');
+            rightContainer.className = 'right-panel-split';
+            rightContainer.innerHTML = '';
+
+            // Panel haut - Freecam
+            const topPanel = document.createElement('div');
+            topPanel.className = 'right-panel-top';
+            
+            const topHeader = document.createElement('div');
+            topHeader.className = 'panel-header';
+            topHeader.innerHTML = '<h2>Freecam</h2>';
+            
+            const topOptions = document.createElement('div');
+            topOptions.className = 'options-list';
+            menuData.freecam.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, 'freecam', index);
+                topOptions.appendChild(optionElement);
+            });
+            
+            topPanel.appendChild(topHeader);
+            topPanel.appendChild(topOptions);
+
+            // Panel bas - Time
+            const bottomPanel = document.createElement('div');
+            bottomPanel.className = 'right-panel-bottom';
+            
+            const bottomHeader = document.createElement('div');
+            bottomHeader.className = 'panel-header';
+            bottomHeader.innerHTML = '<h2>Time</h2>';
+            
+            const bottomOptions = document.createElement('div');
+            bottomOptions.className = 'options-list';
+            menuData.time.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, 'time', index);
+                bottomOptions.appendChild(optionElement);
+            });
+            
+            bottomPanel.appendChild(bottomHeader);
+            bottomPanel.appendChild(bottomOptions);
+
+            rightContainer.appendChild(topPanel);
+            rightContainer.appendChild(bottomPanel);
+        }
+
+        // Charger les deux panneaux à gauche pour Weapon
+        function loadWeaponLeftPanels() {
+            const leftContainer = document.getElementById('left-panel-container');
+            leftContainer.className = 'left-panel-split';
+            leftContainer.innerHTML = '';
+
+            // Panel haut - Weapon options
+            const topPanel = document.createElement('div');
+            topPanel.className = 'left-panel-top';
+            
+            const topHeader = document.createElement('div');
+            topHeader.className = 'panel-header';
+            topHeader.innerHTML = '<h2>Weapon</h2><div class="status-indicator"></div>';
+            
+            const topOptions = document.createElement('div');
+            topOptions.className = 'options-list';
+            menuData.weapon.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, 'weapon', index);
+                topOptions.appendChild(optionElement);
+            });
+            
+            topPanel.appendChild(topHeader);
+            topPanel.appendChild(topOptions);
+
+            // Panel bas - Weapon Custom
+            const bottomPanel = document.createElement('div');
+            bottomPanel.className = 'left-panel-bottom';
+            
+            const bottomHeader = document.createElement('div');
+            bottomHeader.className = 'panel-header';
+            bottomHeader.innerHTML = '<h2>Weapon Custom</h2>';
+            
+            const bottomOptions = document.createElement('div');
+            bottomOptions.className = 'options-list';
+            menuData.weaponcustom.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, 'weaponcustom', index);
+                bottomOptions.appendChild(optionElement);
+            });
+            
+            bottomPanel.appendChild(bottomHeader);
+            bottomPanel.appendChild(bottomOptions);
+
+            leftContainer.appendChild(topPanel);
+            leftContainer.appendChild(bottomPanel);
+        }
+
+        // Charger les deux panneaux pour Weapon
+        function loadWeaponRightPanels() {
+            const rightContainer = document.getElementById('right-panel-container');
+            rightContainer.className = 'right-panel-split';
+            rightContainer.innerHTML = '';
+
+            // Panel haut - Donner armes
+            const topPanel = document.createElement('div');
+            topPanel.className = 'right-panel-top';
+            
+            const topHeader = document.createElement('div');
+            topHeader.className = 'panel-header';
+            topHeader.innerHTML = '<h2>Donner Armes</h2>';
+            
+            const topOptions = document.createElement('div');
+            topOptions.className = 'options-list';
+            menuData.weaponlist.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, 'weaponlist', index);
+                topOptions.appendChild(optionElement);
+            });
+            
+            topPanel.appendChild(topHeader);
+            topPanel.appendChild(topOptions);
+
+            // Panel bas - Weapon Mods
+            const bottomPanel = document.createElement('div');
+            bottomPanel.className = 'right-panel-bottom';
+            
+            const bottomHeader = document.createElement('div');
+            bottomHeader.className = 'panel-header';
+            bottomHeader.innerHTML = '<h2>Weapon Mods</h2>';
+            
+            const bottomOptions = document.createElement('div');
+            bottomOptions.className = 'options-list';
+            menuData.weaponmods.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, 'weaponmods', index);
+                bottomOptions.appendChild(optionElement);
+            });
+            
+            bottomPanel.appendChild(bottomHeader);
+            bottomPanel.appendChild(bottomOptions);
+
+            rightContainer.appendChild(topPanel);
+            rightContainer.appendChild(bottomPanel);
+        }
+
+        // Charger les deux panneaux pour Player
+        function loadPlayerRightPanels() {
+            const rightContainer = document.getElementById('right-panel-container');
+            rightContainer.className = 'right-panel-split';
+            rightContainer.innerHTML = '';
+
+            // Panel haut - Custom Outfits
+            const topPanel = document.createElement('div');
+            topPanel.className = 'right-panel-top';
+            
+            const topHeader = document.createElement('div');
+            topHeader.className = 'panel-header';
+            topHeader.innerHTML = '<h2>Custom Outfits</h2>';
+            
+            const topOptions = document.createElement('div');
+            topOptions.className = 'options-list';
+            menuData.outfits.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, 'outfits', index);
+                topOptions.appendChild(optionElement);
+            });
+            
+            topPanel.appendChild(topHeader);
+            topPanel.appendChild(topOptions);
+
+            // Panel bas - Entités
+            const bottomPanel = document.createElement('div');
+            bottomPanel.className = 'right-panel-bottom';
+            
+            const bottomHeader = document.createElement('div');
+            bottomHeader.className = 'panel-header';
+            bottomHeader.innerHTML = '<h2>Entités</h2>';
+            
+            const bottomOptions = document.createElement('div');
+            bottomOptions.className = 'options-list';
+            menuData.entities.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, 'entities', index);
+                bottomOptions.appendChild(optionElement);
+            });
+            
+            bottomPanel.appendChild(bottomHeader);
+            bottomPanel.appendChild(bottomOptions);
+
+            rightContainer.appendChild(topPanel);
+            rightContainer.appendChild(bottomPanel);
+        }
+
+        // Vider le panneau de droite
+        function clearRightPanel() {
+            const rightContainer = document.getElementById('right-panel-container');
+            rightContainer.className = 'right-panel';
+            rightContainer.innerHTML = `
+                <div class="panel-header">
+                    <h2 id="subcategory-title"></h2>
+                </div>
+                <div class="options-list" id="right-options">
+                </div>
+            `;
+        }
+
+        // Créer un élément d'option
+        function createOptionElement(option, category, index) {
+            const div = document.createElement('div');
+            
+            if (option.type === 'section') {
+                div.className = 'section-header';
+                div.textContent = option.label;
+                return div;
+            }
+
+            div.className = 'option-item';
+
+            const label = document.createElement('span');
+            label.className = 'option-label';
+            label.textContent = option.label;
+            div.appendChild(label);
+
+            const control = document.createElement('div');
+            control.className = 'option-control';
+
+            switch (option.type) {
+                case 'toggle':
+                    const toggle = createToggle(option, category, index);
+                    control.appendChild(toggle);
+                    break;
+
+                case 'slider':
+                    const slider = createSlider(option, category, index);
+                    control.appendChild(slider);
+                    break;
+
+                case 'dropdown':
+                    const dropdown = createDropdown(option, category, index);
+                    control.appendChild(dropdown);
+                    break;
+
+                case 'action':
+                    // Les actions peuvent naviguer vers une sous-catégorie
+                    div.style.cursor = 'pointer';
+                    div.addEventListener('click', () => {
+                        if (option.category) {
+                            // Charger la sous-catégorie dans le panneau de droite
+                            loadSubCategory(option.category);
+                        } else {
+                            console.log(`Action: ${option.label}`);
+                            div.classList.add('active');
+                            setTimeout(() => div.classList.remove('active'), 200);
+                        }
+                    });
+                    break;
+            }
+
+            div.appendChild(control);
+            return div;
+        }
+
+        // Charger une sous-catégorie dans le panneau de droite
+        function loadSubCategory(categoryKey) {
+            const data = menuData[categoryKey];
+            if (!data) return;
+
+            const rightContainer = document.getElementById('right-panel-container');
+            rightContainer.className = 'right-panel';
+            rightContainer.innerHTML = `
+                <div class="panel-header">
+                    <h2 id="subcategory-title">${data.title}</h2>
+                </div>
+                <div class="options-list" id="right-options">
+                </div>
+            `;
+
+            const rightOptions = document.getElementById('right-options');
+            data.options.forEach((option, index) => {
+                const optionElement = createOptionElement(option, categoryKey, index);
+                rightOptions.appendChild(optionElement);
+            });
+        }
+
+        // Créer un toggle switch
+        function createToggle(option, category, index) {
+            const toggle = document.createElement('div');
+            toggle.className = 'toggle-switch';
+            if (option.value) toggle.classList.add('active');
+
+            const key = `${category}_${index}`;
+            activeOptions[key] = option.value;
+
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggle.classList.toggle('active');
+                activeOptions[key] = toggle.classList.contains('active');
+                console.log(`${option.label}: ${activeOptions[key]}`);
+            });
+
+            return toggle;
+        }
+
+        // Créer un slider
+        function createSlider(option, category, index) {
+            const container = document.createElement('div');
+            container.className = 'slider-container';
+
+            const slider = document.createElement('div');
+            slider.className = 'slider';
+
+            const fill = document.createElement('div');
+            fill.className = 'slider-fill';
+
+            const thumb = document.createElement('div');
+            thumb.className = 'slider-thumb';
+
+            const valueDisplay = document.createElement('span');
+            valueDisplay.className = 'slider-value';
+
+            const min = option.min || 0;
+            const max = option.max || 100;
+            const step = option.step || 1;
+            let value = option.value || min;
+
+            const updateSlider = (newValue) => {
+                value = Math.round(newValue / step) * step;
+                value = Math.max(min, Math.min(max, value));
+                const percent = ((value - min) / (max - min)) * 100;
+                fill.style.width = percent + '%';
+                valueDisplay.textContent = value.toFixed(step < 1 ? 1 : 0);
+            };
+
+            updateSlider(value);
+
+            let isDragging = false;
+
+            const handleMove = (e) => {
+                if (!isDragging) return;
+                const rect = slider.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const percent = Math.max(0, Math.min(1, x / rect.width));
+                const newValue = min + (max - min) * percent;
+                updateSlider(newValue);
+            };
+
+            const stopDrag = () => {
+                isDragging = false;
+                document.removeEventListener('mousemove', handleMove);
+                document.removeEventListener('mouseup', stopDrag);
+                document.removeEventListener('touchmove', handleMove);
+                document.removeEventListener('touchend', stopDrag);
+            };
+
+            slider.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                handleMove(e);
+                document.addEventListener('mousemove', handleMove);
+                document.addEventListener('mouseup', stopDrag);
+            });
+
+            slider.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                handleMove(e);
+                document.addEventListener('touchmove', handleMove);
+                document.addEventListener('touchend', stopDrag);
+            });
+
+            fill.appendChild(thumb);
+            slider.appendChild(fill);
+            container.appendChild(slider);
+            container.appendChild(valueDisplay);
+
+            return container;
+        }
+
+        // Créer un dropdown
+        function createDropdown(option, category, index) {
+            const dropdown = document.createElement('div');
+            dropdown.className = 'dropdown';
+
+            const selected = document.createElement('div');
+            selected.className = 'dropdown-selected';
+            selected.textContent = option.values[option.selected || 0];
+
+            selected.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('open');
+                
+                // Cycle through values
+                const currentIndex = option.values.indexOf(selected.textContent);
+                const nextIndex = (currentIndex + 1) % option.values.length;
+                selected.textContent = option.values[nextIndex];
+                console.log(`${option.label}: ${selected.textContent}`);
+            });
+
+            dropdown.appendChild(selected);
+            return dropdown;
+        }
+
+        // Gérer les clics en dehors des dropdowns
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown.open').forEach(dd => {
+                dd.classList.remove('open');
+            });
+        });
+
+        // Rendre le menu draggable via le header
+        const container = document.querySelector('.container');
+        const header = document.querySelector('.header');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        header.addEventListener('mousedown', dragStart);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', dragEnd);
+
+        function dragStart(e) {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+            isDragging = true;
+            header.style.cursor = 'grabbing';
+        }
+
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                setTranslate(currentX, currentY, container);
+            }
+        }
+
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+            header.style.cursor = 'move';
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate(calc(-50% + ${xPos}px), calc(-50% + ${yPos}px))`;
+        }
+
+        // ============================================
+        // FIVEM NUI INTEGRATION
+        // ============================================
+        
+        let menuVisible = false;
+        
+        // Écouter les messages depuis le client FiveM
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            
+            if (data.type === 'openMenu') {
+                // Ouvrir le menu
+                menuVisible = true;
+                document.querySelector('.container').style.display = 'flex';
+                console.log('[ECLIPSE HTML] Menu ouvert');
+            } else if (data.type === 'closeMenu') {
+                // Fermer le menu
+                menuVisible = false;
+                document.querySelector('.container').style.display = 'none';
+                console.log('[ECLIPSE HTML] Menu fermé');
+            }
+        });
+
+        // Fermer le menu avec la touche ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && menuVisible) {
+                // Envoyer le message de fermeture au client FiveM
+                fetch(`https://${GetParentResourceName()}/closeMenu`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                }).catch(err => console.log('[ECLIPSE HTML] Erreur lors de la fermeture'));
+                
+                // Masquer le menu immédiatement
+                menuVisible = false;
+                document.querySelector('.container').style.display = 'none';
+            }
+        });
+
+        // Fonction pour obtenir le nom de la ressource parente (FiveM)
+        function GetParentResourceName() {
+            if (window.GetParentResourceName) {
+                return window.GetParentResourceName();
+            }
+            return 'vanity_menu'; // Nom par défaut si on est en développement
+        }
+
+        // Envoyer les actions au client FiveM
+        function sendAction(action, data) {
+            fetch(`https://${GetParentResourceName()}/menuAction`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: action,
+                    data: data
+                })
+            }).catch(err => console.log('[ECLIPSE HTML] Erreur lors de l\'envoi de l\'action'));
+        }
+
+        // Initialisation - Menu TOUJOURS visible (contrôlé par DUI)
+        window.addEventListener('load', function() {
+            // Toujours afficher le menu (DUI le rendra visible/invisible)
+            document.querySelector('.container').style.display = 'flex';
+            menuVisible = true;
+            console.log('[ECLIPSE HTML] Menu chargé et visible');
+        });
+    </script>
+</body>
+</html>

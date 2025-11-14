@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOV Circle - FiveM DUI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        canvas {
+            display: block;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fovCanvas"></canvas>
+    
+    <script>
+        // ===============================================
+        // FOV Circle Canvas - FiveM DUI Compatible
+        // Upload ce fichier sur GitHub Pages
+        // ===============================================
+        
+        const canvas = document.getElementById('fovCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Configuration canvas fullscreen
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Variables FOV
+        let fovRadius = 100;
+        let targetFovRadius = 100;
+        let circleColor = 'rgba(255, 0, 0, 0.8)';
+        let visible = true;
+        
+        // Animation fluide
+        const lerpSpeed = 0.2;
+        
+        // Recevoir les messages depuis FiveM (SendDuiMessage)
+        window.addEventListener('message', function(event) {
+            try {
+                const data = event.data;
+                
+                if (data.type === 'updateFOV') {
+                    targetFovRadius = data.radius || targetFovRadius;
+                    visible = data.visible !== undefined ? data.visible : visible;
+                    console.log('[FOV] Update:', targetFovRadius, visible);
+                }
+                
+                if (data.type === 'updateColors') {
+                    circleColor = data.circleColor || circleColor;
+                    console.log('[FOV] Color:', circleColor);
+                }
+            } catch (e) {
+                console.error('[FOV] Error:', e);
+            }
+        });
+        
+        // Fonction de dessin
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Ne rien dessiner si invisible
+            if (!visible) {
+                requestAnimationFrame(draw);
+                return;
+            }
+            
+            // Animation fluide (lerp)
+            fovRadius += (targetFovRadius - fovRadius) * lerpSpeed;
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // Dessiner le cercle FOV (sans crosshair)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, fovRadius, 0, 2 * Math.PI);
+            ctx.strokeStyle = circleColor;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Loop
+            requestAnimationFrame(draw);
+        }
+        
+        // Gérer le resize de la fenêtre
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Démarrer l'animation
+        console.log('[FOV] Circle initialized');
+        draw();
+    </script>
+</body>
+</html>

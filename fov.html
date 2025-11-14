@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOV Circle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: transparent;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        canvas {
+            display: block;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fovCanvas"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('fovCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        let fovRadius = 100;
+        let targetFovRadius = 100;
+        let circleColor = 'rgba(255, 0, 0, 0.8)';
+        let crosshairColor = 'rgba(255, 255, 255, 1)';
+        let visible = true;
+        
+        const lerpSpeed = 0.2;
+        
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            
+            if (data.type === 'updateFOV') {
+                targetFovRadius = data.radius || targetFovRadius;
+                visible = data.visible !== undefined ? data.visible : visible;
+            }
+            
+            if (data.type === 'updateColors') {
+                circleColor = data.circleColor || circleColor;
+                crosshairColor = data.crosshairColor || crosshairColor;
+            }
+        });
+        
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (!visible) {
+                requestAnimationFrame(draw);
+                return;
+            }
+            
+            fovRadius += (targetFovRadius - fovRadius) * lerpSpeed;
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, fovRadius, 0, 2 * Math.PI);
+            ctx.strokeStyle = circleColor;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            const crossSize = 12;
+            const crossThick = 2;
+            
+            ctx.strokeStyle = crosshairColor;
+            ctx.lineWidth = crossThick;
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - crossSize);
+            ctx.lineTo(centerX, centerY + crossSize);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(centerX - crossSize, centerY);
+            ctx.lineTo(centerX + crossSize, centerY);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = crosshairColor;
+            ctx.fill();
+            
+            requestAnimationFrame(draw);
+        }
+        
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        draw();
+    </script>
+</body>
+</html>

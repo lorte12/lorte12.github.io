@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ninja Checkbox System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: transparent;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        
+        .checkbox-container {
+            position: absolute;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .checkbox-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-radius: 3px;
+            background: rgba(25, 25, 25, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .checkbox-box.checked {
+            background: var(--accent-color, #ff0000);
+            border-color: var(--accent-color, #ff0000);
+        }
+        
+        .checkbox-box.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #666;
+        }
+        
+        .checkbox-box.disabled.checked {
+            background: #666;
+            border-color: #666;
+        }
+        
+        .checkmark {
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+        }
+        
+        .checkbox-box.checked .checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .checkbox-box.disabled .checkmark {
+            color: #999;
+        }
+        
+        .checkbox-box:not(.disabled):hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="checkboxes"></div>
+    
+    <!-- SERVER NODE.JS (à exécuter avec node) -->
+    <script type="text/node-server">
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const PORT = 8889;
+
+const htmlPath = __filename || path.join(__dirname, 'checkbox-all-in-one.html');
+let htmlContent = '';
+
+try {
+    htmlContent = fs.readFileSync(htmlPath, 'utf8');
+} catch (err) {
+    console.error('[Checkbox Server] Erreur:', err);
+    htmlContent = fs.readFileSync(__filename, 'utf8');
+}
+
+const server = http.createServer((req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    
+    if (req.method === 'OPTIONS') {
+        res.writeHead(200);
+        res.end();
+        return;
+    }
+    
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(htmlContent);
+});
+
+server.listen(PORT, () => {
+    console.log('\x1b[32m========================================\x1b[0m');
+    console.log('\x1b[32m   Checkbox Server - RUNNING\x1b[0m');
+    console.log('\x1b[32m========================================\x1b[0m');
+    console.log('\x1b[33mURL:\x1b[0m http://localhost:' + PORT);
+    console.log('\x1b[36mPress CTRL+C to stop\x1b[0m');
+});
+    </script>
+    
+    <!-- CLIENT JAVASCRIPT (pour le navigateur/DUI) -->
+    <script>
+        // Détecter si on est dans Node.js (serveur) ou navigateur (client)
+        if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+            // MODE SERVEUR : Exécuter le code serveur
+            const serverScript = document.querySelector('script[type="text/node-server"]').textContent;
+            eval(serverScript);
+        } else {
+            // MODE CLIENT : Logique des checkboxes
+            const checkboxes = new Map();
+            
+            window.addEventListener('message', function(event) {
+                const data = event.data;
+                
+                if (data.type === 'createCheckbox') {
+                    createCheckbox(data.id, data.x, data.y, data.checked, data.disabled, data.accentColor);
+                } else if (data.type === 'updateCheckbox') {
+                    updateCheckbox(data.id, data.checked, data.disabled, data.accentColor);
+                } else if (data.type === 'removeCheckbox') {
+                    removeCheckbox(data.id);
+                } else if (data.type === 'clearAll') {
+                    clearAllCheckboxes();
+                }
+            });
+            
+            function createCheckbox(id, x, y, checked, disabled, accentColor) {
+                if (checkboxes.has(id)) {
+                    removeCheckbox(id);
+                }
+                
+                const container = document.createElement('div');
+                container.className = 'checkbox-container';
+                container.style.left = x + 'px';
+                container.style.top = y + 'px';
+                
+                const box = document.createElement('div');
+                box.className = 'checkbox-box';
+                if (checked) box.classList.add('checked');
+                if (disabled) box.classList.add('disabled');
+                
+                if (accentColor) {
+                    box.style.setProperty('--accent-color', accentColor);
+                }
+                
+                const checkmark = document.createElement('span');
+                checkmark.className = 'checkmark';
+                checkmark.textContent = '✓';
+                
+                box.appendChild(checkmark);
+                container.appendChild(box);
+                document.getElementById('checkboxes').appendChild(container);
+                
+                checkboxes.set(id, { container, box, checkmark });
+            }
+            
+            function updateCheckbox(id, checked, disabled, accentColor) {
+                const checkbox = checkboxes.get(id);
+                if (!checkbox) return;
+                
+                const { box } = checkbox;
+                
+                if (checked !== undefined) {
+                    if (checked) {
+                        box.classList.add('checked');
+                    } else {
+                        box.classList.remove('checked');
+                    }
+                }
+                
+                if (disabled !== undefined) {
+                    if (disabled) {
+                        box.classList.add('disabled');
+                    } else {
+                        box.classList.remove('disabled');
+                    }
+                }
+                
+                if (accentColor) {
+                    box.style.setProperty('--accent-color', accentColor);
+                }
+            }
+            
+            function removeCheckbox(id) {
+                const checkbox = checkboxes.get(id);
+                if (checkbox) {
+                    checkbox.container.remove();
+                    checkboxes.delete(id);
+                }
+            }
+            
+            function clearAllCheckboxes() {
+                checkboxes.forEach((checkbox) => {
+                    checkbox.container.remove();
+                });
+                checkboxes.clear();
+            }
+            
+            console.log('[Ninja Checkbox] Client ready');
+        }
+    </script>
+</body>
+</html>
